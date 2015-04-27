@@ -1,4 +1,7 @@
 # pipe
+
+[![Build Status](https://travis-ci.org/hyperboloide/pipe.svg)](https://travis-ci.org/hyperboloide/pipe)
+
 A simple Go stream processing library that works like Unix pipe.
 This library has no external dependencies and is full asynchronous.
 
