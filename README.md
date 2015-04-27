@@ -69,3 +69,5 @@ func main() {
     }
 }
 ```
+
+Another example is available here: [https://gist.github.com/fdelbos/63f0e1357f2c27c0223a](https://gist.github.com/fdelbos/63f0e1357f2c27c0223a)
