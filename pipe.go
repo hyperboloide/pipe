@@ -6,21 +6,26 @@
 // file 'LICENSE', which is part of this source code package.
 //
 
+
+// A simple Go stream processing library that works like Unix pipes.
+// This library has no external dependencies and is fully asynchronous.
 package pipe
 
 import (
 	"io"
 )
 
-type Process func(io.Reader, io.Writer) error
-
+// Pipe object 
 type Pipe struct {
 	reader *io.PipeReader
 
 	errors []chan error
+
+	// Total is the number if bytes read at the origin of the Pipe.
 	Total  int64
 }
 
+// New create a new Pipe that reads from reader.
 func New(reader io.Reader) *Pipe {
 	r, w := io.Pipe()
 
@@ -40,14 +45,17 @@ func New(reader io.Reader) *Pipe {
 	return p
 }
 
-func (p *Pipe) Push(procs ...Process) {
+// Push appends a function to the Pipe.
+// Note that you can add as many functions as you like at once or
+// separatly. They will be processed in order.
+func (p *Pipe) Push(procs ...func(io.Reader, io.Writer) error) {
 	for _, proc := range procs {
 		err := make(chan error, 1)
 		p.errors = append(p.errors, err)
 
 		r, w := io.Pipe()
 
-		go func(p Process, r io.Reader, w *io.PipeWriter, err chan error) {
+		go func(p func(io.Reader, io.Writer) error, r io.Reader, w *io.PipeWriter, err chan error) {
 			err <- p(r, w)
 			w.Close()
 		}(proc, p.reader, w, err)
@@ -56,6 +64,7 @@ func (p *Pipe) Push(procs ...Process) {
 	}
 }
 
+// To writes the ouptut of the Pipe in w. 
 func (p *Pipe) To(w io.Writer) {
 	go func() {
 		io.Copy(w, p.reader)
@@ -63,10 +72,13 @@ func (p *Pipe) To(w io.Writer) {
 	}()
 }
 
+// Reader return a reader to the ouput the of the Pipe
 func (p *Pipe) Reader() io.Reader {
 	return p.reader
 }
 
+// Exec waits for the Pipe to complete and returns an error if any
+// of the functions failed.
 func (p *Pipe) Exec() error {
 	for i, _ := range p.errors {
 		if err := <-p.errors[i]; err != nil {
@@ -78,6 +90,11 @@ func (p *Pipe) Exec() error {
 	return nil
 }
 
+// Tee creates a new Pipe to duplicate the stream.
+// The stream will pass through all previously pushed functions
+// before going through the tee Pipe.
+// Functions pushed to the original Pipe after a call to Tee will
+// not alter the new Tee Pipe.
 func (p *Pipe) Tee() *Pipe {
 	tR, tW := io.Pipe()
 

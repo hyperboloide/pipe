@@ -6,7 +6,7 @@
 // file 'LICENSE', which is part of this source code package.
 //
 
-package pipe
+package pipe_test
 
 import (
 	"bufio"
@@ -15,6 +15,9 @@ import (
 	"errors"
 	"io"
 	"testing"
+	"github.com/hyperboloide/pipe"
+	"os"
+	"log"
 )
 
 func genBlob(size int) []byte {
@@ -55,7 +58,7 @@ func unzip(r io.Reader, w io.Writer) error {
 func TestBasic(t *testing.T) {
 	binReader := bytes.NewReader(bin)
 
-	p := New(binReader)
+	p := pipe.New(binReader)
 	if p == nil {
 		t.Errorf("pipe is nil")
 	}
@@ -78,7 +81,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestProcess(t *testing.T) {
-	p := New(bytes.NewReader(bin))
+	p := pipe.New(bytes.NewReader(bin))
 
 	p.Push(passProc, zip, unzip, zip, unzip)
 
@@ -96,7 +99,7 @@ func TestProcess(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-	p := New(bytes.NewReader(bin))
+	p := pipe.New(bytes.NewReader(bin))
 
 	var procErr = func(r io.Reader, w io.Writer) error {
 		io.Copy(w, r)
@@ -115,7 +118,7 @@ func TestError(t *testing.T) {
 }
 
 func TestTee(t *testing.T) {
-	p := New(bytes.NewReader(bin))
+	p := pipe.New(bytes.NewReader(bin))
 	p.Push(zip)
 
 	pTee := p.Tee()
@@ -145,4 +148,47 @@ func TestTee(t *testing.T) {
 	if !bytes.Equal(resultTee.Bytes(), bin) {
 		t.Errorf("result of tee do not match")
 	}
+}
+
+func ExamplePipe() {
+
+	// some transformation function
+	var zip = func(r io.Reader, w io.Writer) error {
+		gzw, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
+		if err != nil {
+			return err
+		}
+		defer gzw.Close()
+		_, err = io.Copy(gzw, r)
+		return err
+	}
+
+	// pipe input
+	in, err := os.Open("test.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer in.Close()
+
+	// create a new pipe with a io.Reader
+	p := pipe.New(in)
+
+	// Pushing transformation function
+	p.Push(zip)
+
+	// pipe output
+	out, err := os.Create("test.txt.tgz")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer out.Close()
+
+	// Set pipe output io.Writer
+	p.To(out)
+
+	// Wait for pipe process to complete
+	if err := p.Exec(); err != nil {
+		log.Fatal(err)
+	}
+
 }
