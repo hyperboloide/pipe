@@ -7,23 +7,32 @@
 //
 
 
-// A simple Go stream processing library that works like Unix pipes.
+// A simple stream processing library that works like Unix pipes.
 // This library has no external dependencies and is fully asynchronous.
+// Create a Pipe from a Reader, add some transformation functions and
+// get the result writed to a Writer.
 package pipe
 
 import (
 	"io"
 )
 
-// Pipe object 
+// Pipe object
 type Pipe struct {
 	reader *io.PipeReader
 
 	errors []chan error
+	errorWriter chan error
 
-	// Total is the number if bytes read at the origin of the Pipe.
-	Total  int64
+	// Total number of bytes read at the origin of the Pipe.
+	TotalIn  int64
+	// Total number of bytes written at the end of the Pipe.
+	TotalOut int64
 }
+
+// Define PipeFilter functions to transform the stream
+// and add them to the Pipe.
+type PipeFilter func(io.Reader, io.Writer) error
 
 // New create a new Pipe that reads from reader.
 func New(reader io.Reader) *Pipe {
@@ -34,11 +43,12 @@ func New(reader io.Reader) *Pipe {
 		errors: make([]chan error, 1),
 	}
 	p.errors[0] = make(chan error, 1)
+	p.errorWriter = make(chan error, 1)
 
 	go func(errCh chan error) {
 		total, err := io.Copy(w, reader)
 		w.Close()
-		p.Total = total
+		p.TotalIn = total
 		errCh <- err
 	}(p.errors[0])
 
@@ -48,14 +58,14 @@ func New(reader io.Reader) *Pipe {
 // Push appends a function to the Pipe.
 // Note that you can add as many functions as you like at once or
 // separatly. They will be processed in order.
-func (p *Pipe) Push(procs ...func(io.Reader, io.Writer) error) {
+func (p *Pipe) Push(procs ...PipeFilter) {
 	for _, proc := range procs {
 		err := make(chan error, 1)
 		p.errors = append(p.errors, err)
 
 		r, w := io.Pipe()
 
-		go func(p func(io.Reader, io.Writer) error, r io.Reader, w *io.PipeWriter, err chan error) {
+		go func(p PipeFilter, r io.Reader, w *io.PipeWriter, err chan error) {
 			err <- p(r, w)
 			w.Close()
 		}(proc, p.reader, w, err)
@@ -64,22 +74,20 @@ func (p *Pipe) Push(procs ...func(io.Reader, io.Writer) error) {
 	}
 }
 
-// To writes the ouptut of the Pipe in w. 
+// To writes the ouptut of the Pipe in w.
 func (p *Pipe) To(w io.Writer) {
 	go func() {
-		io.Copy(w, p.reader)
-		p.reader.Close()
+		total, err := io.Copy(w, p.reader)
+		p.TotalOut = total
+		p.errorWriter <- err
 	}()
-}
-
-// Reader return a reader to the ouput the of the Pipe
-func (p *Pipe) Reader() io.Reader {
-	return p.reader
 }
 
 // Exec waits for the Pipe to complete and returns an error if any
 // of the functions failed.
 func (p *Pipe) Exec() error {
+	defer p.reader.Close()
+
 	for i, _ := range p.errors {
 		if err := <-p.errors[i]; err != nil {
 			close(p.errors[i])
@@ -87,7 +95,9 @@ func (p *Pipe) Exec() error {
 		}
 		close(p.errors[i])
 	}
-	return nil
+
+	defer close(p.errorWriter)
+	return <- p.errorWriter
 }
 
 // Tee creates a new Pipe to duplicate the stream.

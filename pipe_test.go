@@ -75,15 +75,19 @@ func TestBasic(t *testing.T) {
 		t.Errorf("result do not match")
 	}
 
-	if p.Total != int64(len(bin)) {
-		t.Errorf("total do not match")
+	if p.TotalIn != int64(len(bin)) {
+		t.Errorf("TotalIn do not match")
+	}
+
+	if p.TotalOut != p.TotalIn {
+		t.Errorf("TotalOut: %d should equal TotalIn", p.TotalOut)
 	}
 }
 
 func TestProcess(t *testing.T) {
 	p := pipe.New(bytes.NewReader(bin))
 
-	p.Push(passProc, zip, unzip, zip, unzip)
+	p.Push(passProc, zip, unzip, zip)
 
 	var result bytes.Buffer
 	writer := bufio.NewWriter(&result)
@@ -93,8 +97,8 @@ func TestProcess(t *testing.T) {
 		t.Errorf("errors detected during pipe: %s", err)
 	}
 
-	if !bytes.Equal(result.Bytes(), bin) {
-		t.Errorf("result do not match")
+	if bytes.Equal(result.Bytes(), bin) {
+		t.Errorf("result should not match")
 	}
 }
 
@@ -152,7 +156,7 @@ func TestTee(t *testing.T) {
 
 func ExamplePipe() {
 
-	// some transformation function
+	// some PipeFilter transformation function
 	var zip = func(r io.Reader, w io.Writer) error {
 		gzw, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {
