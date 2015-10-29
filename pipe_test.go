@@ -13,11 +13,11 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
-	"io"
-	"testing"
 	"github.com/hyperboloide/pipe"
-	"os"
+	"io"
 	"log"
+	"os"
+	"testing"
 )
 
 func genBlob(size int) []byte {

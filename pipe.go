@@ -6,7 +6,6 @@
 // file 'LICENSE', which is part of this source code package.
 //
 
-
 // A simple stream processing library that works like Unix pipes.
 // This library has no external dependencies and is fully asynchronous.
 // Create a Pipe from a Reader, add some transformation functions and
@@ -21,11 +20,11 @@ import (
 type Pipe struct {
 	reader *io.PipeReader
 
-	errors []chan error
+	errors      []chan error
 	errorWriter chan error
 
 	// Total number of bytes read at the origin of the Pipe.
-	TotalIn  int64
+	TotalIn int64
 	// Total number of bytes written at the end of the Pipe.
 	TotalOut int64
 }
@@ -99,7 +98,7 @@ func (p *Pipe) Exec() error {
 	}
 
 	defer close(p.errorWriter)
-	return <- p.errorWriter
+	return <-p.errorWriter
 }
 
 // Tee creates a new Pipe to duplicate the stream.
