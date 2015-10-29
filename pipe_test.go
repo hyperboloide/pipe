@@ -58,14 +58,10 @@ func unzip(r io.Reader, w io.Writer) error {
 func TestBasic(t *testing.T) {
 	binReader := bytes.NewReader(bin)
 
-	p := pipe.New(binReader)
-	if p == nil {
-		t.Errorf("pipe is nil")
-	}
-
 	var result bytes.Buffer
 	writer := bufio.NewWriter(&result)
-	p.To(writer)
+
+	p := pipe.New(binReader).To(writer)
 
 	if err := p.Exec(); err != nil {
 		t.Errorf("errors detected during pipe: %s", err)
@@ -85,9 +81,7 @@ func TestBasic(t *testing.T) {
 }
 
 func TestProcess(t *testing.T) {
-	p := pipe.New(bytes.NewReader(bin))
-
-	p.Push(passProc, zip, unzip, zip)
+	p := pipe.New(bytes.NewReader(bin)).Push(passProc, zip, unzip, zip)
 
 	var result bytes.Buffer
 	writer := bufio.NewWriter(&result)

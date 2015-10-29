@@ -58,7 +58,7 @@ func New(reader io.Reader) *Pipe {
 // Push appends a function to the Pipe.
 // Note that you can add as many functions as you like at once or
 // separatly. They will be processed in order.
-func (p *Pipe) Push(procs ...PipeFilter) {
+func (p *Pipe) Push(procs ...PipeFilter) *Pipe {
 	for _, proc := range procs {
 		err := make(chan error, 1)
 		p.errors = append(p.errors, err)
@@ -72,15 +72,17 @@ func (p *Pipe) Push(procs ...PipeFilter) {
 
 		p.reader = r
 	}
+	return p
 }
 
 // To writes the ouptut of the Pipe in w.
-func (p *Pipe) To(w io.Writer) {
+func (p *Pipe) To(w io.Writer) *Pipe {
 	go func() {
 		total, err := io.Copy(w, p.reader)
 		p.TotalOut = total
 		p.errorWriter <- err
 	}()
+	return p
 }
 
 // Exec waits for the Pipe to complete and returns an error if any
