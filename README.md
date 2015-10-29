@@ -3,7 +3,9 @@
 [![Build Status](https://travis-ci.org/hyperboloide/pipe.svg)](https://travis-ci.org/hyperboloide/pipe)
 [![GoDoc](https://godoc.org/github.com/hyperboloide/pipe?status.svg)](https://godoc.org/github.com/hyperboloide/pipe)
 
-A simple Go stream processing library that works like Unix pipes. This library has no external dependencies and is fully asynchronous.
+A simple stream processing library that works like Unix pipes.
+This library has no external dependencies and is fully asynchronous.
+Create a Pipe from a Reader, add some transformation functions and get the result writed to a Writer.
 
 To install :
 ```sh
@@ -40,18 +42,13 @@ func zip(r io.Reader, w io.Writer) error {
 }
 
 func main() {
+
     // pipe input
     in, err := os.Open("test.txt")
     if err != nil {
         log.Fatal(err)
     }
     defer in.Close()
-
-    // create a new pipe with a io.Reader
-    p := pipe.New(in)
-
-    // Pushing transformation function
-    p.Push(zip)
 
     // pipe output
     out, err := os.Create("test.txt.tgz")
@@ -60,14 +57,12 @@ func main() {
     }
     defer out.Close()
 
-    // Set pipe output io.Writer
-    p.To(out)
-
-    // Wait for pipe process to complete
-    if err := p.Exec(); err != nil {
+    // create a new pipe with a io.Reader
+    // Push a transformation function
+    // Set output
+    // Exec and get errors if any
+    if err := pipe.New(in).Push(zip).To(out).Exec(); err != nil {
         log.Fatal(err)
     }
 }
 ```
-
-Another example is available here: [https://gist.github.com/fdelbos/63f0e1357f2c27c0223a](https://gist.github.com/fdelbos/63f0e1357f2c27c0223a)
