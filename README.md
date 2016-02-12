@@ -9,8 +9,14 @@ Create a Pipe from a Reader, add some transformation functions and get the resul
 
 To install :
 ```sh
-go get github.com/hyperboloide/pipe
+$ go get github.com/hyperboloide/pipe
 ```
+
+Then add the following import :
+```go
+import "github.com/hyperboloide/pipe"
+```
+
 
 ### Example
 
