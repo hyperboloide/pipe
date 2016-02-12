@@ -9,7 +9,7 @@
 // A simple stream processing library that works like Unix pipes.
 // This library has no external dependencies and is fully asynchronous.
 // Create a Pipe from a Reader, add some transformation functions and
-// get the result writed to a Writer.
+// get the result on an io.Writer.
 package pipe
 
 import (
@@ -79,6 +79,19 @@ func (p *Pipe) To(w io.Writer) *Pipe {
 	go func() {
 		total, err := io.Copy(w, p.reader)
 		p.TotalOut = total
+		p.errorWriter <- err
+	}()
+	return p
+}
+
+// ToCloser writes the ouptut of the Pipe in io.WriteCloser w and close at the end.
+func (p *Pipe) ToCloser(w io.WriteCloser) *Pipe {
+	go func() {
+		total, err := io.Copy(w, p.reader)
+		p.TotalOut = total
+		if err == nil {
+			err = w.Close()
+		}
 		p.errorWriter <- err
 	}()
 	return p

@@ -22,3 +22,6 @@ _testmain.go
 *.exe
 *.test
 *.prof
+rw/google_cloud_key.json
+rw/s3.env.sh
+vendor
