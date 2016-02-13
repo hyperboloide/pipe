@@ -12,15 +12,17 @@ var (
 	S3BucketUndefined = errors.New("S3 bucket is undefined.")
 )
 
-// Defines connection parameters to S3
+// Defines connection parameters to S3.
+// An S3 Object allow the use of AWS S3.
 type S3 struct {
 	Prefixed
 	// The s3-compatible endpoint. Defaults to "s3.amazonaws.com"
 	Domain string
+
 	// If the key is not set we try to read from env
-	AccessKey     string
-	SecureKey     string
-	SecurityToken string
+	AccessKey     string // AWS_ACCESS_KEY_ID
+	SecureKey     string // AWS_SECRET_ACCESS_KEY
+	SecurityToken string // AWS_SECURITY_TOKEN
 
 	// Bucket name
 	Bucket string

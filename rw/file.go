@@ -8,10 +8,14 @@ import (
 	"path/filepath"
 )
 
+// Defines a Directory to save files.
 type File struct {
 	Prefixed
-	Dir         string
-	AllowSub    bool
+	// Root dir
+	Dir string
+	// Allow the creation of sub directories
+	AllowSub bool
+	// Remove Empy directories on Delete.
 	RemoveEmpty bool
 }
 
@@ -30,6 +34,7 @@ func (s *File) Start() error {
 	return nil
 }
 
+// Update or create a file.
 func (s *File) NewWriter(id string) (io.WriteCloser, error) {
 	name := s.Prefixed.Name(id)
 
@@ -44,10 +49,12 @@ func (s *File) NewWriter(id string) (io.WriteCloser, error) {
 	return os.OpenFile(s.join(name), os.O_RDWR|os.O_CREATE, 0600)
 }
 
+// read a file.
 func (s *File) NewReader(id string) (io.ReadCloser, error) {
 	return os.OpenFile(s.join(s.Prefixed.Name(id)), os.O_RDONLY, 0400)
 }
 
+// delete a file
 func (s *File) Delete(id string) error {
 	name := s.Prefixed.Name(id)
 	if err := os.Remove(s.join(name)); err != nil {
