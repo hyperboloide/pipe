@@ -4,7 +4,7 @@
 [![GoDoc](https://godoc.org/github.com/hyperboloide/pipe?status.svg)](https://godoc.org/github.com/hyperboloide/pipe)
 
 A simple stream processing library that works like Unix pipes.
-This library has no external dependencies and is fully asynchronous.
+This library is fully asynchronous.
 Create a Pipe from a Reader, add some transformation functions and get the result writed to a Writer.
 
 To install :
