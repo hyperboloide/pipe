@@ -9,16 +9,6 @@ import (
 	"testing"
 )
 
-func genBlob(size int) []byte {
-	blob := make([]byte, size)
-	for i := 0; i < size; i++ {
-		blob[i] = 65 // ascii 'A'
-	}
-	return blob
-}
-
-var bin = genBlob(1 << 24)
-
 func TestGzip(t *testing.T) {
 
 	gz := &encoders.Gzip{}

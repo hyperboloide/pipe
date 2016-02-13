@@ -61,19 +61,15 @@ func (g *GoogleCloud) Start() error {
 
 // Returns a Writer to Google Cloud Storage
 func (g *GoogleCloud) NewWriter(id string) (io.WriteCloser, error) {
-	oh := g.bucketHandle.Object(g.Prefixed.Name(id))
-	return oh.NewWriter(nil), nil
-	// return storage.NewWriter(g.context, g.Bucket, g.Prefixed.Name(id)), nil
+	return g.bucketHandle.Object(g.Prefixed.Name(id)).NewWriter(nil), nil
 }
 
 // Returns a reader to Google Cloud Storage
 func (g *GoogleCloud) NewReader(id string) (io.ReadCloser, error) {
-	oh := g.bucketHandle.Object(g.Prefixed.Name(id))
-	return oh.NewReader(nil)
+	return g.bucketHandle.Object(g.Prefixed.Name(id)).NewReader(nil)
 }
 
 // Deletes and object on Google Cloud Storage
 func (g *GoogleCloud) Delete(id string) error {
-	oh := g.bucketHandle.Object(g.Prefixed.Name(id))
-	return oh.Delete(nil)
+	return g.bucketHandle.Object(g.Prefixed.Name(id)).Delete(nil)
 }

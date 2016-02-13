@@ -16,7 +16,7 @@ func genBlob(size int) []byte {
 	return blob
 }
 
-var bin = genBlob(1 << 24)
+var bin = genBlob(1 << 22)
 
 func testReadWriteDeleter(rwd rw.ReadWriteDeleter, id string) error {
 
