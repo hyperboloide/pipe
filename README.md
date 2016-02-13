@@ -72,3 +72,52 @@ func main() {
     }
 }
 ```
+
+### Readers and Writers
+
+Pipe also provides a set of Reader/Writer to read from and write to. 
+
+* [S3](https://github.com/hyperboloide/pipe/blob/master/rw/s3.go)
+* [Google Cloud Storage](https://github.com/hyperboloide/pipe/blob/master/rw/google_cloud.go)
+* [File](https://github.com/hyperboloide/pipe/blob/master/rw/file.go)
+
+Here is an example:
+
+```go
+import (
+	"github.com/hyperboloide/pipe"
+	"github.com/hyperboloide/pipe/rw"
+	"log"
+	"os"
+)
+
+func DemoRW() {
+
+	in, err := os.Open("test.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer in.Close()
+
+	file := &rw.File{AllowSub: true}
+
+	// Always start before use. Note that an RW after Start can be reused.
+	if err := file.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Obtain a writer
+	w, err := file.NewWriter("copy.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// ToCloser() closes the connection at the end of the write.
+	if err := pipe.New(binReader).ToCloser(w).Exec(); err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+It's also easy to create your own, just implement the [ReadWriteDeleter](https://github.com/hyperboloide/pipe/blob/master/rw/rw.go) interface.
+
