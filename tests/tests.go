@@ -1,4 +1,4 @@
-package rw_test
+package tests
 
 import (
 	"bufio"
@@ -6,19 +6,11 @@ import (
 	"errors"
 	"github.com/hyperboloide/pipe"
 	"github.com/hyperboloide/pipe/rw"
+	"io/ioutil"
+	"os"
 )
 
-func genBlob(size int) []byte {
-	blob := make([]byte, size)
-	for i := 0; i < size; i++ {
-		blob[i] = 65 // ascii 'A'
-	}
-	return blob
-}
-
-var bin = genBlob(1 << 22)
-
-func testReadWriteDeleter(rwd rw.ReadWriteDeleter, id string) error {
+func TestReadWriteDeleter(rwd rw.ReadWriteDeleter, id, file string) error {
 
 	if err := rwd.Start(); err != nil {
 		return err
@@ -29,9 +21,13 @@ func testReadWriteDeleter(rwd rw.ReadWriteDeleter, id string) error {
 		return err
 	}
 
-	binReader := bytes.NewReader(bin)
+	reader, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
 
-	if err := pipe.New(binReader).ToCloser(w).Exec(); err != nil {
+	if err := pipe.New(reader).ToCloser(w).Exec(); err != nil {
 		return err
 	}
 
@@ -45,7 +41,13 @@ func testReadWriteDeleter(rwd rw.ReadWriteDeleter, id string) error {
 
 	if err := pipe.New(r).To(writer).Exec(); err != nil {
 		return err
-	} else if bytes.Equal(result.Bytes(), bin) == false {
+	}
+	bin, err := ioutil.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	if bytes.Equal(result.Bytes(), bin) == false {
 		return errors.New("file content do not match original.")
 	}
 

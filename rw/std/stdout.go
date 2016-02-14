@@ -1,4 +1,4 @@
-package rw
+package std
 
 import (
 	"errors"

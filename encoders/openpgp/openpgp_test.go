@@ -1,29 +1,29 @@
-package encoders_test
+package openpgp_test
 
 import (
 	"bufio"
 	"bytes"
 	"errors"
 	"github.com/hyperboloide/pipe"
-	"github.com/hyperboloide/pipe/encoders"
-	"log"
+	"github.com/hyperboloide/pipe/encoders/openpgp"
+	"io/ioutil"
 	"os"
 	"testing"
 )
 
 func TestOpenPGP(t *testing.T) {
 
-	rPub, err := os.Open("./openpgp/the_key.pub")
+	rPub, err := os.Open("./the_key.pub")
 	if err != nil {
 		t.Error(err)
 	}
 
-	rPriv, err := os.Open("./openpgp/the_key.sec")
+	rPriv, err := os.Open("./the_key.sec")
 	if err != nil {
 		t.Error(err)
 	}
 
-	pgp := &encoders.OpenPGP{
+	pgp := &openpgp.OpenPGP{
 		PrivateKey: rPriv,
 		PublicKey:  rPub,
 	}
@@ -31,7 +31,17 @@ func TestOpenPGP(t *testing.T) {
 		t.Error(err)
 	}
 
-	reader := bytes.NewReader(bin)
+	reader, err := os.Open("../../tests/test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+	defer reader.Close()
+
+	bin, err := ioutil.ReadFile("../../tests/test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+
 	var result1 bytes.Buffer
 	writer := bufio.NewWriter(&result1)
 
@@ -41,13 +51,11 @@ func TestOpenPGP(t *testing.T) {
 		t.Error(errors.New("Content match original."))
 	}
 
-	log.Print(string(bin[:]))
-
-	reader = bytes.NewReader(result1.Bytes())
+	reader2 := bytes.NewReader(result1.Bytes())
 	var result2 bytes.Buffer
 	writer = bufio.NewWriter(&result2)
 
-	if err := pipe.New(reader).Push(pgp.Decode).To(writer).Exec(); err != nil {
+	if err := pipe.New(reader2).Push(pgp.Decode).To(writer).Exec(); err != nil {
 		t.Error(err)
 	} else if bytes.Equal(result1.Bytes(), bin) == true {
 		t.Error(errors.New("Content match original."))

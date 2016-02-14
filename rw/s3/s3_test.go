@@ -1,7 +1,8 @@
-package rw_test
+package s3_test
 
 import (
-	"github.com/hyperboloide/pipe/rw"
+	"github.com/hyperboloide/pipe/rw/s3"
+	"github.com/hyperboloide/pipe/tests"
 	"log"
 	"os"
 	"testing"
@@ -14,12 +15,13 @@ func TestS3(t *testing.T) {
 		return
 	}
 
-	s3 := &rw.S3{
+	s := &s3.S3{
 		Domain: "s3-eu-central-1.amazonaws.com",
 		Bucket: "test.pipe",
 	}
 
-	if err := testReadWriteDeleter(s3, "s3_test_obj"); err != nil {
+	err := tests.TestReadWriteDeleter(s, "s3_test_obj", "../../tests/test.jpg")
+	if err != nil {
 		t.Error(err)
 	}
 

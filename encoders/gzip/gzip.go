@@ -1,4 +1,4 @@
-package encoders
+package gzip
 
 import (
 	"compress/gzip"

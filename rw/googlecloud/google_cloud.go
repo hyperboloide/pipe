@@ -1,7 +1,8 @@
-package rw
+package googlecloud
 
 import (
 	"errors"
+	"github.com/hyperboloide/pipe/rw"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/cloud"
@@ -21,7 +22,7 @@ var (
 
 // Defines connection parameters to Google Cloud Storage
 type GoogleCloud struct {
-	Prefixed
+	rw.Prefixed
 	ProjectId    string
 	Bucket       string
 	JsonKeyPath  string

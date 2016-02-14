@@ -1,22 +1,34 @@
-package encoders_test
+package gzip_test
 
 import (
 	"bufio"
 	"bytes"
 	"errors"
 	"github.com/hyperboloide/pipe"
-	"github.com/hyperboloide/pipe/encoders"
+	"github.com/hyperboloide/pipe/encoders/gzip"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
 func TestGzip(t *testing.T) {
 
-	gz := &encoders.Gzip{}
+	gz := &gzip.Gzip{}
 	if err := gz.Start(); err != nil {
 		t.Error(err)
 	}
 
-	reader := bytes.NewReader(bin)
+	reader, err := os.Open("../../tests/test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+	defer reader.Close()
+
+	bin, err := ioutil.ReadFile("../../tests/test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+
 	var result1 bytes.Buffer
 	writer := bufio.NewWriter(&result1)
 
@@ -28,11 +40,11 @@ func TestGzip(t *testing.T) {
 		t.Error(errors.New("file content greater than original."))
 	}
 
-	reader = bytes.NewReader(result1.Bytes())
+	reader2 := bytes.NewReader(result1.Bytes())
 	var result2 bytes.Buffer
 	writer = bufio.NewWriter(&result2)
 
-	if err := pipe.New(reader).Push(gz.Decode).To(writer).Exec(); err != nil {
+	if err := pipe.New(reader2).Push(gz.Decode).To(writer).Exec(); err != nil {
 		t.Error(err)
 	} else if bytes.Equal(result1.Bytes(), bin) == true {
 		t.Error(errors.New("file content match original."))

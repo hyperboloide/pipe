@@ -1,7 +1,8 @@
-package rw
+package s3
 
 import (
 	"errors"
+	"github.com/hyperboloide/pipe/rw"
 	"github.com/rlmcpherson/s3gof3r"
 	"io"
 )
@@ -15,7 +16,8 @@ var (
 // Defines connection parameters to S3.
 // An S3 Object allow the use of AWS S3.
 type S3 struct {
-	Prefixed
+	rw.Prefixed
+
 	// The s3-compatible endpoint. Defaults to "s3.amazonaws.com"
 	Domain string
 

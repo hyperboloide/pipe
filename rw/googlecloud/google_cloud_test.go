@@ -1,7 +1,8 @@
-package rw_test
+package googlecloud_test
 
 import (
-	"github.com/hyperboloide/pipe/rw"
+	"github.com/hyperboloide/pipe/rw/googlecloud"
+	"github.com/hyperboloide/pipe/tests"
 	"log"
 	"os"
 	"testing"
@@ -18,13 +19,14 @@ func TestGoogleCloud(t *testing.T) {
 		return
 	}
 
-	gc := &rw.GoogleCloud{
+	gc := &googlecloud.GoogleCloud{
 		ProjectId:   "hyperboloide",
 		Bucket:      "test-pipe",
 		JsonKeyPath: gcKeyPath,
 	}
 
-	if err := testReadWriteDeleter(gc, "gc_test_obj"); err != nil {
+	err := tests.TestReadWriteDeleter(gc, "gc_test_obj", "../../tests/test.jpg")
+	if err != nil {
 		t.Error(err)
 	}
 }

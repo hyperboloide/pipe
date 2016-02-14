@@ -1,7 +1,8 @@
-package rw
+package file
 
 import (
 	"errors"
+	"github.com/hyperboloide/pipe/rw"
 	"io"
 	"io/ioutil"
 	"os"
@@ -10,7 +11,7 @@ import (
 
 // Defines a Directory to save files.
 type File struct {
-	Prefixed
+	rw.Prefixed
 	// Root dir
 	Dir string
 	// Allow the creation of sub directories

@@ -1,4 +1,4 @@
-package encoders
+package openpgp
 
 import (
 	"errors"
