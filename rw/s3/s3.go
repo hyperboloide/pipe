@@ -22,9 +22,8 @@ type S3 struct {
 	Domain string
 
 	// If the key is not set we try to read from env
-	AccessKey     string // AWS_ACCESS_KEY_ID
-	SecureKey     string // AWS_SECRET_ACCESS_KEY
-	SecurityToken string // AWS_SECURITY_TOKEN
+	AccessKey string // AWS_ACCESS_KEY_ID
+	SecretKey string // AWS_SECRET_ACCESS_KEY
 
 	// Bucket name
 	Bucket string
@@ -43,13 +42,12 @@ func (s *S3) Start() error {
 	}
 
 	var s3p *s3gof3r.S3
-	if s.AccessKey != "" && s.SecureKey != "" {
+	if s.AccessKey != "" && s.SecretKey != "" {
 		s3p = s3gof3r.New(
 			s.Domain,
 			s3gof3r.Keys{
-				AccessKey:     s.AccessKey,
-				SecretKey:     s.SecureKey,
-				SecurityToken: s.SecurityToken})
+				AccessKey: s.AccessKey,
+				SecretKey: s.SecretKey})
 	} else if keys, err := s3gof3r.EnvKeys(); err != nil {
 		return err
 	} else {

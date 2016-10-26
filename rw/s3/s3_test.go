@@ -21,7 +21,7 @@ func TestS3(t *testing.T) {
 		Bucket:    "test.pipe",
 		Domain:    "s3-eu-central-1.amazonaws.com",
 		AccessKey: os.Getenv("AWS_ACCESS_KEY_ID"),
-		SecureKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		SecretKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
 	}
 
 	if err := s.Start(); err != nil {

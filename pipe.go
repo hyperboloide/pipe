@@ -59,6 +59,10 @@ func New(reader io.Reader) *Pipe {
 // separatly. They will be processed in order.
 func (p *Pipe) Push(procs ...PipeFilter) *Pipe {
 	for _, proc := range procs {
+		if proc == nil {
+			continue
+		}
+
 		err := make(chan error, 1)
 		p.errors = append(p.errors, err)
 
