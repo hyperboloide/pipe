@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-// Defines a Directory to save files.
+// File defines a Directory to save files.
 type File struct {
 	rw.Prefixed
 	// Root dir
@@ -20,6 +20,7 @@ type File struct {
 	RemoveEmpty bool
 }
 
+// Start the file encoder. Creates a tempdir is File.Dir == "".
 func (s *File) Start() error {
 
 	if s.Dir == "" {
@@ -35,7 +36,7 @@ func (s *File) Start() error {
 	return nil
 }
 
-// Update or create a file.
+// NewWriter update or create a file.
 func (s *File) NewWriter(id string) (io.WriteCloser, error) {
 	name := s.Prefixed.Name(id)
 
@@ -50,12 +51,12 @@ func (s *File) NewWriter(id string) (io.WriteCloser, error) {
 	return os.OpenFile(s.join(name), os.O_RDWR|os.O_CREATE, 0600)
 }
 
-// read a file.
+// NewReader read a file.
 func (s *File) NewReader(id string) (io.ReadCloser, error) {
 	return os.OpenFile(s.join(s.Prefixed.Name(id)), os.O_RDONLY, 0400)
 }
 
-// delete a file
+// Delete a file
 func (s *File) Delete(id string) error {
 	name := s.Prefixed.Name(id)
 	if err := os.Remove(s.join(name)); err != nil {
@@ -74,18 +75,22 @@ func (s *File) join(path string) string {
 func (s *File) removeIfEmpty(dir string) error {
 	if dir == "." {
 		return nil
-	} else {
-		f, err := os.Open(s.join(dir))
-		if err != nil {
-			return err
-		}
-		defer f.Close()
 
-		_, err = f.Readdir(1)
-		if err != io.EOF {
-			return err
-		}
 	}
+
+	f, err := os.Open(s.join(dir))
+	if err != nil {
+		return err
+
+	}
+	defer f.Close()
+
+	_, err = f.Readdir(1)
+	if err != io.EOF {
+		return err
+
+	}
+
 	os.Remove(s.join(dir))
 	return s.removeIfEmpty(filepath.Dir(dir))
 }

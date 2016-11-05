@@ -150,7 +150,7 @@ func TestTee(t *testing.T) {
 
 func ExamplePipe() {
 
-	// some PipeFilter transformation function
+	// some Filter transformation function
 	var zip = func(r io.Reader, w io.Writer) error {
 		gzw, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 		if err != nil {

@@ -7,13 +7,15 @@ import (
 	"io"
 )
 
+// S3DefaultDomain is the default domain to connect to S3
 const S3DefaultDomain = "s3.amazonaws.com"
 
 var (
-	S3BucketUndefined = errors.New("S3 bucket is undefined.")
+	// ErrS3BucketUndefined is returned when the bucket is undefined
+	ErrS3BucketUndefined = errors.New("S3 bucket is undefined.")
 )
 
-// Defines connection parameters to S3.
+// S3 defines connection parameters to S3.
 // An S3 Object allow the use of AWS S3.
 type S3 struct {
 	rw.Prefixed
@@ -30,7 +32,7 @@ type S3 struct {
 	bucket *s3gof3r.Bucket
 }
 
-// Starts an S3 bucket
+// Start an S3 bucket
 func (s *S3) Start() error {
 
 	if s.Domain == "" {
@@ -38,7 +40,7 @@ func (s *S3) Start() error {
 	}
 
 	if s.Bucket == "" {
-		return S3BucketUndefined
+		return ErrS3BucketUndefined
 	}
 
 	var s3p *s3gof3r.S3
@@ -57,12 +59,12 @@ func (s *S3) Start() error {
 	return nil
 }
 
-// Returns a new S3 Writer
+// NewWriter returns a new S3 Writer
 func (s *S3) NewWriter(id string) (io.WriteCloser, error) {
 	return s.bucket.PutWriter(s.Prefixed.Name(id), nil, nil)
 }
 
-// Returns a new S3 Reader
+// NewReader returns a new S3 Reader
 func (s *S3) NewReader(id string) (io.ReadCloser, error) {
 	r, _, err := s.bucket.GetReader(s.Prefixed.Name(id), nil)
 	return r, err

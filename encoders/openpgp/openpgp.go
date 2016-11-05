@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-// Encrypt and Decrypt with an OpenPGP key pair.
+// OpenPGP Encrypt and Decrypt with a key pair.
 // The file gen.sh in the child directory 'openpgp' gives an example on
 // how to generate a PGP key pair.
 type OpenPGP struct {
@@ -26,7 +26,7 @@ type OpenPGP struct {
 	publicEntityList  openpgp.EntityList
 }
 
-// Reads the keys and decrypt the private key if a PassPhrase is set.
+// Start reads the keys and decrypt the private key if a PassPhrase is set.
 func (o *OpenPGP) Start() error {
 	var err error
 
@@ -58,7 +58,7 @@ func (o *OpenPGP) Start() error {
 	return err
 }
 
-// Encrypt with the public key.
+// Encode encrypts a stream with the public key.
 func (o *OpenPGP) Encode(r io.Reader, w io.Writer) error {
 	if len(o.publicEntityList) == 0 {
 		return errors.New("No public key defined for OpenPGP.")
@@ -74,7 +74,7 @@ func (o *OpenPGP) Encode(r io.Reader, w io.Writer) error {
 	return err
 }
 
-// Decrypt with the private key
+// Decode decrypts with the private key
 func (o *OpenPGP) Decode(r io.Reader, w io.Writer) error {
 	if len(o.privateEntityList) == 0 {
 		return errors.New("No private key defined for OpenPGP.")

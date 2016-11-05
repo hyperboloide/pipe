@@ -6,7 +6,7 @@
 // file 'LICENSE', which is part of this source code package.
 //
 
-// A simple stream processing library that works like Unix pipes.
+// Package pipe is a simple stream processing library that works like Unix pipes.
 // This library has no external dependencies and is fully asynchronous.
 // Create a Pipe from a Reader, add some transformation functions and
 // get the result on an io.Writer.
@@ -29,9 +29,9 @@ type Pipe struct {
 	TotalOut int64
 }
 
-// Define PipeFilter functions to transform the stream
+// Filter are functions to transform the stream
 // and add them to the Pipe.
-type PipeFilter func(io.Reader, io.Writer) error
+type Filter func(io.Reader, io.Writer) error
 
 // New create a new Pipe that reads from reader.
 func New(reader io.Reader) *Pipe {
@@ -57,7 +57,7 @@ func New(reader io.Reader) *Pipe {
 // Push appends a function to the Pipe.
 // Note that you can add as many functions as you like at once or
 // separatly. They will be processed in order.
-func (p *Pipe) Push(procs ...PipeFilter) *Pipe {
+func (p *Pipe) Push(procs ...Filter) *Pipe {
 	for _, proc := range procs {
 		if proc == nil {
 			continue
@@ -68,7 +68,7 @@ func (p *Pipe) Push(procs ...PipeFilter) *Pipe {
 
 		r, w := io.Pipe()
 
-		go func(p PipeFilter, r io.Reader, w *io.PipeWriter, err chan error) {
+		go func(p Filter, r io.Reader, w *io.PipeWriter, err chan error) {
 			err <- p(r, w)
 			w.Close()
 		}(proc, p.reader, w, err)
@@ -106,7 +106,7 @@ func (p *Pipe) ToCloser(w io.WriteCloser) *Pipe {
 func (p *Pipe) Exec() error {
 	defer p.reader.Close()
 
-	for i, _ := range p.errors {
+	for i := range p.errors {
 		if err := <-p.errors[i]; err != nil {
 			close(p.errors[i])
 			return err

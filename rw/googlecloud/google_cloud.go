@@ -11,39 +11,48 @@ import (
 	"io/ioutil"
 )
 
+// GoogleCloudScope is the scope to access the bucket.
 const GoogleCloudScope = "https://www.googleapis.com/auth/devstorage.read_write"
 
 var (
-	GcBucketUndefined    = errors.New("Google Cloud bucket is undefined.")
-	GcProjectIdUndefiend = errors.New("Google Cloud project id is undefined.")
-	NoAuthProvided       = errors.New("No mean of identification provided.")
-	JsonKeyNotFound      = errors.New("Cannot read json key.")
+	// ErrGcBucketUndefined is returned if the bucket is undefined.
+	ErrGcBucketUndefined = errors.New("Google Cloud bucket is undefined.")
+
+	// ErrGcProjectIDUndefiend is returned if the
+	// Google Cloud project id is undefined.
+	ErrGcProjectIDUndefiend = errors.New("Google Cloud project id is undefined.")
+
+	// ErrNoAuthProvided is returned if no mean of identification is provided.
+	ErrNoAuthProvided = errors.New("No mean of identification provided.")
+
+	// ErrJSONKeyNotFound is returned if the json key cannot be read
+	ErrJSONKeyNotFound = errors.New("Cannot read json key.")
 )
 
-// Defines connection parameters to Google Cloud Storage
+// GoogleCloud defines connection parameters to Google Cloud Storage
 type GoogleCloud struct {
 	rw.Prefixed
-	ProjectId    string
+	ProjectID    string
 	Bucket       string
-	JsonKeyPath  string
+	JSONKeyPath  string
 	context      context.Context
 	bucketHandle *storage.BucketHandle
 }
 
-// Starts a connection to Google Cloud Storage
+// Start a connection to Google Cloud Storage
 func (g *GoogleCloud) Start() error {
 	if g.Bucket == "" {
-		return GcBucketUndefined
-	} else if g.ProjectId == "" {
-		return GcProjectIdUndefiend
+		return ErrGcBucketUndefined
+	} else if g.ProjectID == "" {
+		return ErrGcProjectIDUndefiend
 	}
 
-	if g.JsonKeyPath == "" {
-		return NoAuthProvided
+	if g.JSONKeyPath == "" {
+		return ErrNoAuthProvided
 	}
-	data, err := ioutil.ReadFile(g.JsonKeyPath)
+	data, err := ioutil.ReadFile(g.JSONKeyPath)
 	if err != nil {
-		return JsonKeyNotFound
+		return ErrJSONKeyNotFound
 	}
 	conf, err := google.JWTConfigFromJSON(data, GoogleCloudScope)
 	if err != nil {
@@ -60,17 +69,17 @@ func (g *GoogleCloud) Start() error {
 	return nil
 }
 
-// Returns a Writer to Google Cloud Storage
+// NewWriter returns a Writer to Google Cloud Storage
 func (g *GoogleCloud) NewWriter(id string) (io.WriteCloser, error) {
 	return g.bucketHandle.Object(g.Prefixed.Name(id)).NewWriter(nil), nil
 }
 
-// Returns a reader to Google Cloud Storage
+// NewReader returns a reader to Google Cloud Storage
 func (g *GoogleCloud) NewReader(id string) (io.ReadCloser, error) {
 	return g.bucketHandle.Object(g.Prefixed.Name(id)).NewReader(nil)
 }
 
-// Deletes and object on Google Cloud Storage
+// Delete an object on Google Cloud Storage
 func (g *GoogleCloud) Delete(id string) error {
 	return g.bucketHandle.Object(g.Prefixed.Name(id)).Delete(nil)
 }

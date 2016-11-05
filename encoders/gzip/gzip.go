@@ -5,10 +5,12 @@ import (
 	"io"
 )
 
+// Gzip is an encoders that compress a stream
 type Gzip struct {
 	Level int
 }
 
+// Start the Gzip encoder
 func (g *Gzip) Start() error {
 	switch g.Level {
 	case gzip.DefaultCompression:
@@ -20,6 +22,7 @@ func (g *Gzip) Start() error {
 	return nil
 }
 
+// Encode to a Gzip stream
 func (g *Gzip) Encode(r io.Reader, w io.Writer) error {
 	gzw, err := gzip.NewWriterLevel(w, g.Level)
 	if err != nil {
@@ -30,6 +33,7 @@ func (g *Gzip) Encode(r io.Reader, w io.Writer) error {
 	return err
 }
 
+// Decode a Gzip stream
 func (g *Gzip) Decode(r io.Reader, w io.Writer) error {
 	gzr, err := gzip.NewReader(r)
 	defer gzr.Close()
