@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hyperboloide/pipe.svg)](https://travis-ci.org/hyperboloide/pipe)
 [![GoDoc](https://godoc.org/github.com/hyperboloide/pipe?status.svg)](https://godoc.org/github.com/hyperboloide/pipe)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hyperboloide/pipe)](https://goreportcard.com/report/github.com/hyperboloide/pipe)
 
 A simple stream processing library that works like Unix pipes.
 This library is fully asynchronous.
@@ -75,7 +76,7 @@ func main() {
 
 ### Readers and Writers
 
-Pipe also provides a set of Reader/Writer to read from and write to. 
+Pipe also provides a set of Reader/Writer to read from and write to.
 
 * [S3](https://github.com/hyperboloide/pipe/blob/master/rw/s3.go)
 * [Google Cloud Storage](https://github.com/hyperboloide/pipe/blob/master/rw/google_cloud.go)
@@ -120,4 +121,3 @@ func DemoRW() {
 ```
 
 It's also easy to create your own, just implement the [ReadWriteDeleter](https://github.com/hyperboloide/pipe/blob/master/rw/rw.go) interface.
-
