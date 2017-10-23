@@ -11,3 +11,9 @@ type BaseEncoder interface {
 
 // EncodeFun is a shortcut type for an encode function
 type EncodeFun func(io.Reader, io.Writer) error
+
+type EncoderDecoder interface {
+	Encode(r io.Reader, w io.Writer) error
+	Decode(r io.Reader, w io.Writer) error
+	BaseEncoder
+}

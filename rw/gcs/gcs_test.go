@@ -1,6 +1,7 @@
 package gcs_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/hyperboloide/pipe/rw/gcs"
@@ -9,9 +10,15 @@ import (
 
 func TestGCS(t *testing.T) {
 
+	if os.Getenv("GCS_BUCKET") == "" {
+		t.Skip("GCS_BUCKET env variable not set! Skipping Test")
+	} else if os.Getenv("GCS_KEY_FILE") == "" {
+		t.Skip("GCS_KEY_FILE env variable not set! Skipping Test")
+	}
+
 	s := &gcs.GCS{
-		Bucket:            "hyperboloide-pipe-test",
-		ServiceAccountKey: "./Ozigo-aab90df49241.json",
+		Bucket:            os.Getenv("GCS_BUCKET"),
+		ServiceAccountKey: os.Getenv("GCS_KEY_FILE"),
 	}
 
 	if err := s.Start(); err != nil {

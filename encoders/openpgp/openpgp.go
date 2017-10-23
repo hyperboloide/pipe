@@ -2,8 +2,10 @@ package openpgp
 
 import (
 	"errors"
-	"golang.org/x/crypto/openpgp"
 	"io"
+	"os"
+
+	"golang.org/x/crypto/openpgp"
 )
 
 // OpenPGP Encrypt and Decrypt with a key pair.
@@ -11,16 +13,22 @@ import (
 // how to generate a PGP key pair.
 type OpenPGP struct {
 
+	// If your key doesn't have a pass phrase, leave it empty.
+	PassPhrase string
+
 	// A reader to the private key file.
 	// If not set then decryption will not be possible.
 	PrivateKey io.Reader
 
-	// If your key doesn't have a pass phrase, leave it empty.
-	PassPhrase string
+	// Will read the private key from a file if set.
+	PrivateKeyPath string
 
 	// A reader to the public key file.
 	// If not set then encryption will not be possible.
 	PublicKey io.Reader
+
+	// Will read the public key from a file if set.
+	PublicKeyPath string
 
 	privateEntityList openpgp.EntityList
 	publicEntityList  openpgp.EntityList
@@ -29,6 +37,26 @@ type OpenPGP struct {
 // Start reads the keys and decrypt the private key if a PassPhrase is set.
 func (o *OpenPGP) Start() error {
 	var err error
+
+	var privKF, pubKF *os.File
+
+	if o.PrivateKeyPath != "" {
+		if privKF, err = os.Open(o.PrivateKeyPath); err != nil {
+			return err
+		} else {
+			o.PrivateKey = privKF
+			defer privKF.Close()
+		}
+	}
+
+	if o.PublicKeyPath != "" {
+		if pubKF, err = os.Open(o.PublicKeyPath); err != nil {
+			return err
+		} else {
+			o.PublicKey = pubKF
+			defer pubKF.Close()
+		}
+	}
 
 	if o.PrivateKey != nil {
 		o.privateEntityList, err = openpgp.ReadKeyRing(o.PrivateKey)
