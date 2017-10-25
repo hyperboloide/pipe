@@ -36,8 +36,8 @@ var (
 
 func ReadConfig() json.RawMessage {
 	if *ConfigPath == "" {
-		if _, err := os.Stat("./config.json"); os.IsExist(err) {
-			*ConfigPath = "./config.json"
+		if _, err := os.Stat("./piped.json"); os.IsExist(err) {
+			*ConfigPath = "./piped.json"
 		} else if _, err := os.Stat("/etc/piped/config.json"); os.IsExist(err) {
 			*ConfigPath = "/etc/piped/config.json"
 		} else if _, err := os.Stat(os.Getenv("HOME") + "/.piped/config.json"); os.IsExist(err) {
