@@ -18,11 +18,11 @@ const (
 )
 
 var (
-	App = kingpin.New("piped", "PipeD Server")
+	App = kingpin.New("piped", "Piped Server")
 
 	Port = kingpin.Flag("port", "Port number for of the HTTP service.").
 		Default("7890").
-		OverrideDefaultFromEnvar("PIPE_PORT").
+		OverrideDefaultFromEnvar("PIPED_PORT").
 		Short('p').
 		Int()
 
@@ -38,10 +38,10 @@ func ReadConfig() json.RawMessage {
 	if *ConfigPath == "" {
 		if _, err := os.Stat("./config.json"); os.IsExist(err) {
 			*ConfigPath = "./config.json"
-		} else if _, err := os.Stat("/etc/pipe/config.json"); os.IsExist(err) {
-			*ConfigPath = "/etc/pipe/config.json"
-		} else if _, err := os.Stat(os.Getenv("HOME") + "/.pipe/config.json"); os.IsExist(err) {
-			*ConfigPath = os.Getenv("HOME") + "/.pipe/config.json"
+		} else if _, err := os.Stat("/etc/piped/config.json"); os.IsExist(err) {
+			*ConfigPath = "/etc/piped/config.json"
+		} else if _, err := os.Stat(os.Getenv("HOME") + "/.piped/config.json"); os.IsExist(err) {
+			*ConfigPath = os.Getenv("HOME") + "/.piped/config.json"
 		} else {
 			log.Fatal("no configuration file found!")
 		}
