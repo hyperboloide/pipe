@@ -1,0 +1,39 @@
+[
+  {
+    "url": "files",
+    "writer": [
+      {
+        "encoder": "gzip"
+      },
+      {
+        "tee": [
+          {
+            "encoder": "aes",
+            "key":"l2CijrWFXB2qeKgxlsIqrypKylKWTLnDB8/Joujcjsw="
+          },
+          {
+            "output": "s3",
+            "bucket": "my_backup",
+            "domain": "s3.eu-central-1.amazonaws.com",
+            "access_key": "my_s3_access_key_id",
+            "secret_key":"my_s3_secret_access_key",
+            "suffix": ".enc"
+          }
+        ]
+      },
+      {
+        "output": "file",
+        "dir": "/var/files"
+      }
+    ],
+    "reader": [
+      {
+        "input": "file",
+        "dir": "/var/files"
+      },
+      {
+        "decoder": "gzip"
+      }
+    ]
+  }
+]

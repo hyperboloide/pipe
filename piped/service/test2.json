@@ -1,0 +1,69 @@
+[
+  {
+    "url": "test",
+    "writer": [
+      {
+        "tee": [
+          {"encoder": "gzip"},
+          {
+            "tee": [
+              {
+                "output": "file",
+                "dir": "%s",
+                "suffix": ".zip"
+              }
+            ]
+          },
+          {
+            "encoder": "aes",
+            "key": "l2CijrWFXB2qeKgxlsIqrypKylKWTLnDB8/Joujcjsw="
+          },
+          {
+            "output": "file",
+            "dir": "%s",
+            "suffix": ".enc"
+          }
+        ]
+      },
+      {
+        "output": "file",
+        "dir": "%s"
+      }
+    ]
+  },
+  {
+    "url": "original",
+    "reader": [
+      {
+        "input": "file",
+        "dir": "%s"
+      }
+    ]
+  },
+  {
+    "url": "gziped",
+    "reader": [
+      {
+        "input": "file",
+        "dir": "%s",
+        "suffix": ".zip"
+      },
+      {"decoder": "gzip"}
+    ]
+  },
+  {
+    "url": "aes_gziped",
+    "reader": [
+      {
+        "input": "file",
+        "dir": "%s",
+        "suffix": ".enc"
+      },
+      {
+        "decoder": "aes",
+        "key": "l2CijrWFXB2qeKgxlsIqrypKylKWTLnDB8/Joujcjsw="
+      },
+      {"decoder": "gzip"}
+    ]
+  }
+]

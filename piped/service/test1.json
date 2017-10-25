@@ -1,0 +1,21 @@
+[
+  {
+    "url": "test",
+    "writer": [
+      {
+        "output": "file",
+        "dir": "%s"
+      }
+    ],
+    "reader": [
+      {
+        "input": "file",
+        "dir": "%s"
+      }
+    ],
+    "deleter": {
+      "type": "file",
+      "dir": "%s"
+    }
+  }
+]

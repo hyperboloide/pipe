@@ -1,0 +1,33 @@
+[
+  {
+    "url": "files",
+    "writer": [
+      {
+        "encoder": "gzip"
+      },
+      {
+        "encoder":"openpgp",
+        "public_key":"/etc/pgp/my_key.pub"
+      },
+      {
+        "output":"gcs",
+        "bucket":"my_bucket",
+        "key":"/etc/gcs/my_key.json"
+      }
+    ],
+    "reader": [
+      {
+        "input":"gcs",
+        "bucket":"my_bucket",
+        "key":"/etc/gcs/my_key.json"
+      },
+      {
+        "decoder":"openpgp",
+        "private_key":"/etc/pgp/my_key.sec"
+      },
+      {
+        "decoder": "gzip"
+      }
+    ]
+  }
+]

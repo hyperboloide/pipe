@@ -27,3 +27,4 @@ rw/s3.env.sh
 vendor
 rw/googlecloud/google_cloud_key.json
 rw/s3/s3.env.sh
+/piped/piped
