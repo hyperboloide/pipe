@@ -14,21 +14,21 @@ import (
 type OpenPGP struct {
 
 	// If your key doesn't have a pass phrase, leave it empty.
-	PassPhrase string
+	PassPhrase string `json:"pass_phrase"`
 
 	// A reader to the private key file.
 	// If not set then decryption will not be possible.
 	PrivateKey io.Reader
 
 	// Will read the private key from a file if set.
-	PrivateKeyPath string
+	PrivateKeyPath string `json:"private_key"`
 
 	// A reader to the public key file.
 	// If not set then encryption will not be possible.
 	PublicKey io.Reader
 
 	// Will read the public key from a file if set.
-	PublicKeyPath string
+	PublicKeyPath string `json:"public_key"`
 
 	privateEntityList openpgp.EntityList
 	publicEntityList  openpgp.EntityList

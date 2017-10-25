@@ -17,7 +17,7 @@ type AES struct {
 
 	// Alternativly to the key, a b64 encoded string can be set as the key
 	// and will be decoded on start if Key is nil.
-	KeyB64 string
+	KeyB64 string `json:"key"`
 }
 
 func (a *AES) Start() error {

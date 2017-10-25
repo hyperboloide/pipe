@@ -15,8 +15,8 @@ import (
 type GCS struct {
 	rw.Prefixed
 
-	Bucket            string
-	ServiceAccountKey string
+	Bucket            string `json:"bucket"`
+	ServiceAccountKey string `json:"key"`
 	bucket            *storage.BucketHandle
 }
 

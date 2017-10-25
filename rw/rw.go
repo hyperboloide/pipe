@@ -18,6 +18,7 @@ type Writer interface {
 // Reader is a base interface to read data.
 type Reader interface {
 	Base
+	NewReader(string) (io.ReadCloser, error)
 }
 
 // Deleter is a base interface to delete data.
@@ -41,11 +42,25 @@ type ReadWriteDeleter interface {
 	Delete(string) error
 }
 
+// ReadDeleter is a type with Base, Reader and Deleter
+type ReaderDeleter interface {
+	Base
+	NewReader(string) (io.ReadCloser, error)
+	Delete(string) error
+}
+
+// WriteDeleter is a type with Base, Writer and Deleter
+type WriterDeleter interface {
+	Base
+	NewWriter(string) (io.WriteCloser, error)
+	Delete(string) error
+}
+
 // Prefixed  struct allows to define prefix and suffix (for example a
 // file extension)
 type Prefixed struct {
-	Prefix string
-	Suffix string
+	Prefix string `json:"prefix"`
+	Suffix string `json:"suffix"`
 }
 
 // Name generate a name from with prefix and suffix

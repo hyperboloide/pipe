@@ -7,7 +7,7 @@ import (
 
 // Gzip is an encoders that compress a stream
 type Gzip struct {
-	Level int
+	Level int `json:"level"`
 }
 
 // Start the Gzip encoder
