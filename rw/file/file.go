@@ -2,22 +2,23 @@ package file
 
 import (
 	"errors"
-	"github.com/hyperboloide/pipe/rw"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/hyperboloide/pipe/rw"
 )
 
 // File defines a Directory to save files.
 type File struct {
 	rw.Prefixed
 	// Root dir
-	Dir string
+	Dir string `json:"dir"`
 	// Allow the creation of sub directories
-	AllowSub bool
+	AllowSub bool `json:"allow_sub"`
 	// Remove Empy directories on Delete.
-	RemoveEmpty bool
+	RemoveEmpty bool `json:"remove_empty"`
 }
 
 // Start the file encoder. Creates a tempdir is File.Dir == "".
@@ -38,17 +39,18 @@ func (s *File) Start() error {
 
 // NewWriter update or create a file.
 func (s *File) NewWriter(id string) (io.WriteCloser, error) {
+	const mod = os.O_WRONLY | os.O_CREATE | os.O_TRUNC
 	name := s.Prefixed.Name(id)
 
 	if filepath.Dir(name) == "." {
-		return os.OpenFile(s.join(name), os.O_RDWR|os.O_CREATE, 0600)
+		return os.OpenFile(s.join(name), mod, 0600)
 	} else if s.AllowSub == false {
 		return nil, errors.New("sub directories not allowed")
 	}
 	if err := os.MkdirAll(s.join(filepath.Dir(name)), 0700); err != nil {
 		return nil, err
 	}
-	return os.OpenFile(s.join(name), os.O_RDWR|os.O_CREATE, 0600)
+	return os.OpenFile(s.join(name), mod, 0600)
 }
 
 // NewReader read a file.
