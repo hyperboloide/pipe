@@ -13,39 +13,43 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
-type ServiceDefinition struct {
+// Definition defines a URL enpoint and at lease a either a Writer,
+// a Reader or a Deleter.
+type Definition struct {
 	URL        string          `json:"url"`
 	WriterPipe json.RawMessage `json:"writer,omitempty"`
 	ReaderPipe json.RawMessage `json:"reader,omitempty"`
 	Deleter    json.RawMessage `json:"deleter,omitempty"`
 }
 
-func (sd *ServiceDefinition) Error(err error) {
-	log.Fatalf("service '%s' encountred an error: %s", sd.URL, err)
+// Error display the service url and the encountred error.
+func (d *Definition) Error(err error) {
+	log.Fatalf("service '%s' encountred an error: %s", d.URL, err)
 }
 
-func SetHandler(r *chi.Mux, sd ServiceDefinition) {
-	r.Route("/"+sd.URL, func(r chi.Router) {
+// SetHandler set the right handler in chi for the provoded ServiceDefinition.
+func SetHandler(r *chi.Mux, d Definition) {
+	r.Route("/"+d.URL, func(r chi.Router) {
 
-		if sd.ReaderPipe != nil {
-			if ops, err := NewReadOperationsFromJson(sd.ReaderPipe); err != nil {
-				sd.Error(err)
+		if d.ReaderPipe != nil {
+			if ops, err := NewReadOperationsFromJSON(d.ReaderPipe); err != nil {
+				d.Error(err)
 			} else {
 				SetReadHandler(r, ops)
 			}
 		}
 
-		if sd.WriterPipe != nil {
-			if ops, err := NewWriteOperationsFromJson(sd.WriterPipe); err != nil {
-				sd.Error(err)
+		if d.WriterPipe != nil {
+			if ops, err := NewWriteOperationsFromJSON(d.WriterPipe); err != nil {
+				d.Error(err)
 			} else {
 				SetWriteHandler(r, ops)
 			}
 		}
 
-		if sd.Deleter != nil {
-			if del, err := DeleterFromJson(sd.Deleter); err != nil {
-				sd.Error(err)
+		if d.Deleter != nil {
+			if del, err := DeleterFromJSON(d.Deleter); err != nil {
+				d.Error(err)
 			} else {
 				SetDeleteHandler(r, del)
 			}
@@ -55,6 +59,7 @@ func SetHandler(r *chi.Mux, sd ServiceDefinition) {
 
 }
 
+// SetReadHandler sets a chi handler for a Reader.
 func SetReadHandler(r chi.Router, ops *ReadOperations) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
@@ -76,6 +81,7 @@ func SetReadHandler(r chi.Router, ops *ReadOperations) {
 	r.Get("/{id}", handler)
 }
 
+// SetDeleteHandler sets a chi handler for a Deleter.
 func SetDeleteHandler(r chi.Router, del rw.Deleter) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")
@@ -89,6 +95,14 @@ func SetDeleteHandler(r chi.Router, del rw.Deleter) {
 	r.Delete("/{id}", handler)
 }
 
+// WriteResponse is returned as a json response on a sucessfull write.
+type WriteResponse struct {
+	ID       string `json:"id"`
+	BytesIn  int64  `json:"bytes_in"`
+	BytesOut int64  `json:"bytes_out"`
+}
+
+// SetWriteHandler sets a chi router for a Writer.
 func SetWriteHandler(r chi.Router, ops *WriteOperations) {
 	handler := func(id string, w http.ResponseWriter, r *http.Request) {
 		var reader io.Reader
@@ -105,10 +119,8 @@ func SetWriteHandler(r chi.Router, ops *WriteOperations) {
 		} else if err := p.Exec(); err != nil {
 			http.Error(w, http.StatusText(500), 500)
 		} else {
-			data := struct {
-				In  int64 `bytes_in`
-				Out int64 `bytes_out`
-			}{p.TotalIn, p.TotalOut}
+			data := &WriteResponse{id, p.TotalIn, p.TotalOut}
+
 			if res, err := json.Marshal(data); err != nil {
 				http.Error(w, http.StatusText(500), 500)
 			} else {

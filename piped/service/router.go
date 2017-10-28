@@ -8,13 +8,14 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+// RouterFromConfig setup a chi.Mux router from a json configuration.
 func RouterFromConfig(config json.RawMessage, silent bool) *chi.Mux {
 	r := chi.NewRouter()
 	if !silent {
 		r.Use(middleware.Logger)
 	}
 
-	services := []ServiceDefinition{}
+	services := []Definition{}
 	if err := json.Unmarshal(config, &services); err != nil {
 		log.Fatal(err)
 	} else if len(services) == 0 {

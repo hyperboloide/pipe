@@ -36,6 +36,9 @@ func (g *Gzip) Encode(r io.Reader, w io.Writer) error {
 // Decode a Gzip stream
 func (g *Gzip) Decode(r io.Reader, w io.Writer) error {
 	gzr, err := gzip.NewReader(r)
+	if err != nil {
+		return err
+	}
 	defer gzr.Close()
 	_, err = io.Copy(w, gzr)
 	return err

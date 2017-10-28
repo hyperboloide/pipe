@@ -20,19 +20,20 @@ type AES struct {
 	KeyB64 string `json:"key"`
 }
 
+// Start the encoder.
 func (a *AES) Start() error {
 	if a.Key == nil && a.KeyB64 == "" {
-		return errors.New("Key undefined for AES.")
+		return errors.New("key undefined for AES")
 	}
 	if a.Key == nil {
-		if res, err := base64.StdEncoding.DecodeString(a.KeyB64); err != nil {
+		res, err := base64.StdEncoding.DecodeString(a.KeyB64)
+		if err != nil {
 			return err
-		} else {
-			a.Key = res
 		}
+		a.Key = res
 	}
 	if len(a.Key) < 32 {
-		return errors.New("Key size must be at least 32 bytes")
+		return errors.New("key size must be at least 32 bytes")
 	}
 	return nil
 }
@@ -42,42 +43,42 @@ func (a *AES) Start() error {
 func (a *AES) Encode(r io.Reader, w io.Writer) error {
 	iv := make([]byte, aes.BlockSize)
 
-	if block, err := aes.NewCipher(a.Key); err != nil {
+	block, err := aes.NewCipher(a.Key)
+	if err != nil {
 		return err
-	} else if _, err := rand.Read(iv[:]); err != nil {
+	} else if _, err = rand.Read(iv[:]); err != nil {
 		return err
-	} else if _, err := w.Write(iv); err != nil {
-		return err
-	} else {
-		stream := cipher.NewCFBEncrypter(block, iv)
-		writer := &cipher.StreamWriter{S: stream, W: w}
-		_, err := io.Copy(writer, r)
+	} else if _, err = w.Write(iv); err != nil {
 		return err
 	}
+	stream := cipher.NewCFBEncrypter(block, iv)
+	writer := &cipher.StreamWriter{S: stream, W: w}
+	_, err = io.Copy(writer, r)
+	return err
 }
 
 // Decode an encrypted stream that start with an IV.
 func (a *AES) Decode(r io.Reader, w io.Writer) error {
 	iv := make([]byte, aes.BlockSize)
 
-	if block, err := aes.NewCipher(a.Key); err != nil {
+	block, err := aes.NewCipher(a.Key)
+	if err != nil {
 		return err
-	} else if _, err := r.Read(iv[:]); err != nil {
-		return err
-	} else {
-		stream := cipher.NewCFBDecrypter(block, iv)
-		reader := &cipher.StreamReader{S: stream, R: r}
-		_, err := io.Copy(w, reader)
+	} else if _, err = r.Read(iv[:]); err != nil {
 		return err
 	}
+	stream := cipher.NewCFBDecrypter(block, iv)
+	reader := &cipher.StreamReader{S: stream, R: r}
+	_, err = io.Copy(w, reader)
+	return err
 }
 
 // GenKey generates a 32 bytes key encoded in base64.
 func GenKey() (string, error) {
 	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
+	_, err := rand.Read(b)
+	if err != nil {
 		return "", err
-	} else {
-		return base64.StdEncoding.EncodeToString(b), nil
 	}
+	return base64.StdEncoding.EncodeToString(b), nil
 }

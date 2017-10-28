@@ -20,9 +20,12 @@ Flags:
 Args:
   [<config>]  Path to the configuration file.
 ```
+
+## Configuration
+
 The configuration is a simple json file (examples can be found in the [examples](https://github.com/hyperboloide/pipe/tree/master/piped/examples)
 directory)
-You can provide the path of the configuation file as an argument otherwise the program will search for the following locations:
+You can provide the path of the configuration file as an argument otherwise the program will search for the following locations:
 1. `./piped.json`
-2. `/etc/piped/config.json`
-3. `$HOME/.piped/config.json`
+2. `/etc/piped/piped.json`
+3. `$HOME/.piped.json`

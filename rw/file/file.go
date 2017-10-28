@@ -21,7 +21,7 @@ type File struct {
 	RemoveEmpty bool `json:"remove_empty"`
 }
 
-// Start the file encoder. Creates a tempdir is File.Dir == "".
+// Start the File. Creates a tempdir is File.Dir == "".
 func (s *File) Start() error {
 
 	if s.Dir == "" {
@@ -44,7 +44,7 @@ func (s *File) NewWriter(id string) (io.WriteCloser, error) {
 
 	if filepath.Dir(name) == "." {
 		return os.OpenFile(s.join(name), mod, 0600)
-	} else if s.AllowSub == false {
+	} else if !s.AllowSub {
 		return nil, errors.New("sub directories not allowed")
 	}
 	if err := os.MkdirAll(s.join(filepath.Dir(name)), 0700); err != nil {
@@ -64,7 +64,7 @@ func (s *File) Delete(id string) error {
 	if err := os.Remove(s.join(name)); err != nil {
 		return err
 	}
-	if s.RemoveEmpty == true && filepath.Dir(name) != "." {
+	if s.RemoveEmpty && filepath.Dir(name) != "." {
 		return s.removeIfEmpty(filepath.Dir(name))
 	}
 	return nil
@@ -93,6 +93,8 @@ func (s *File) removeIfEmpty(dir string) error {
 
 	}
 
-	os.Remove(s.join(dir))
+	if err := os.Remove(s.join(dir)); err != nil {
+		return err
+	}
 	return s.removeIfEmpty(filepath.Dir(dir))
 }

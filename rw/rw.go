@@ -43,14 +43,14 @@ type ReadWriteDeleter interface {
 }
 
 // ReadDeleter is a type with Base, Reader and Deleter
-type ReaderDeleter interface {
+type ReadDeleter interface {
 	Base
 	NewReader(string) (io.ReadCloser, error)
 	Delete(string) error
 }
 
 // WriteDeleter is a type with Base, Writer and Deleter
-type WriterDeleter interface {
+type WriteDeleter interface {
 	Base
 	NewWriter(string) (io.WriteCloser, error)
 	Delete(string) error

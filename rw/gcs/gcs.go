@@ -20,6 +20,7 @@ type GCS struct {
 	bucket            *storage.BucketHandle
 }
 
+// Start the GCS.
 func (rw *GCS) Start() error {
 	ctx := context.Background()
 	var client *storage.Client

@@ -43,37 +43,22 @@ func (o *OpenPGP) Start() error {
 	if o.PrivateKeyPath != "" {
 		if privKF, err = os.Open(o.PrivateKeyPath); err != nil {
 			return err
-		} else {
-			o.PrivateKey = privKF
-			defer privKF.Close()
 		}
+		o.PrivateKey = privKF
+		defer privKF.Close()
 	}
 
 	if o.PublicKeyPath != "" {
 		if pubKF, err = os.Open(o.PublicKeyPath); err != nil {
 			return err
-		} else {
-			o.PublicKey = pubKF
-			defer pubKF.Close()
 		}
+		o.PublicKey = pubKF
+		defer pubKF.Close()
 	}
 
 	if o.PrivateKey != nil {
-		o.privateEntityList, err = openpgp.ReadKeyRing(o.PrivateKey)
-		if err != nil {
+		if err = o.loadPrivateKey(); err != nil {
 			return err
-		} else if o.PassPhrase != "" {
-			ppb := []byte(o.PassPhrase)
-			entity := o.privateEntityList[0]
-
-			if err := entity.PrivateKey.Decrypt(ppb); err != nil {
-				return err
-			}
-			for _, k := range entity.Subkeys {
-				if err = k.PrivateKey.Decrypt(ppb); err != nil {
-					return err
-				}
-			}
 		}
 	}
 
@@ -86,10 +71,27 @@ func (o *OpenPGP) Start() error {
 	return err
 }
 
+func (o *OpenPGP) loadPrivateKey() (err error) {
+	o.privateEntityList, err = openpgp.ReadKeyRing(o.PrivateKey)
+	if err == nil && o.PassPhrase != "" {
+		ppb := []byte(o.PassPhrase)
+		entity := o.privateEntityList[0]
+		if err = entity.PrivateKey.Decrypt(ppb); err != nil {
+			return
+		}
+		for _, k := range entity.Subkeys {
+			if err = k.PrivateKey.Decrypt(ppb); err != nil {
+				return
+			}
+		}
+	}
+	return
+}
+
 // Encode encrypts a stream with the public key.
 func (o *OpenPGP) Encode(r io.Reader, w io.Writer) error {
 	if len(o.publicEntityList) == 0 {
-		return errors.New("No public key defined for OpenPGP.")
+		return errors.New("no public key defined for OpenPGP")
 	}
 
 	wPGP, err := openpgp.Encrypt(w, o.publicEntityList, nil, nil, nil)
@@ -105,7 +107,7 @@ func (o *OpenPGP) Encode(r io.Reader, w io.Writer) error {
 // Decode decrypts with the private key
 func (o *OpenPGP) Decode(r io.Reader, w io.Writer) error {
 	if len(o.privateEntityList) == 0 {
-		return errors.New("No private key defined for OpenPGP.")
+		return errors.New("no private key defined for OpenPGP")
 	}
 
 	md, err := openpgp.ReadMessage(r, o.privateEntityList, nil, nil)

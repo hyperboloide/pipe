@@ -16,9 +16,11 @@ import (
 )
 
 var (
-	ErrUnknowElementType = errors.New("unknow element does not implement a valid type.")
+	// ErrUnknowElementType is returned if an element does not implement a valid type.
+	ErrUnknowElementType = errors.New("unknow element does not implement a valid type")
 )
 
+// GetElementType return a string representing the element type.
 func GetElementType(js json.RawMessage) (string, error) {
 	tmp := map[string]interface{}{}
 	types := []string{"tee", "encoder", "decoder", "input", "output"}
@@ -33,18 +35,13 @@ func GetElementType(js json.RawMessage) (string, error) {
 	return "", ErrUnknowElementType
 }
 
-func GetType(js json.RawMessage) (string, error) {
-	tmp := struct {
-		Type string `json:"type"`
-	}{}
-	err := json.Unmarshal(js, &tmp)
-	return tmp.Type, err
-}
-
+// Startable is an object that implements a Start() method. It'is used
+// to start encoders and rws.
 type Startable interface {
 	Start() error
 }
 
+// UnmarshalAndStart unmarshals a Startable element and start it.
 func UnmarshalAndStart(s Startable, js json.RawMessage) error {
 	if err := json.Unmarshal(js, s); err != nil {
 		return err
@@ -54,114 +51,102 @@ func UnmarshalAndStart(s Startable, js json.RawMessage) error {
 	return nil
 }
 
-func EncoderFromJson(js json.RawMessage) (encoders.Encoder, error) {
+// EncoderFromJSON builds an encoder from json.
+func EncoderFromJSON(js json.RawMessage) (encoders.Encoder, error) {
 	tmp := struct {
 		Type string `json:"encoder"`
 	}{}
 	if err := json.Unmarshal(js, &tmp); err != nil {
 		return nil, err
+	} else if res := EncoderDecoderFromString(tmp.Type); res == nil {
+		return nil, fmt.Errorf("encoder of type '%s' is not supported", tmp.Type)
 	} else {
-		var res encoders.Encoder
-		switch tmp.Type {
-		case "gzip":
-			res = &gzip.Gzip{}
-		case "aes":
-			res = &aes.AES{}
-		case "openpgp":
-			res = &openpgp.OpenPGP{}
-		default:
-			return nil, fmt.Errorf("Encoder of type '%s' is not supported", tmp.Type)
-		}
 		return res, UnmarshalAndStart(res, js)
 	}
 }
 
-func DecoderFromJson(js json.RawMessage) (encoders.Decoder, error) {
+// DecoderFromJSON builds a decoder from json.
+func DecoderFromJSON(js json.RawMessage) (encoders.Decoder, error) {
 	tmp := struct {
 		Type string `json:"decoder"`
 	}{}
 	if err := json.Unmarshal(js, &tmp); err != nil {
 		return nil, err
+	} else if res := EncoderDecoderFromString(tmp.Type); res == nil {
+		return nil, fmt.Errorf("decoder of type '%s' is not supported", tmp.Type)
 	} else {
-		var res encoders.Decoder
-		switch tmp.Type {
-		case "gzip":
-			res = &gzip.Gzip{}
-		case "aes":
-			res = &aes.AES{}
-		case "openpgp":
-			res = &openpgp.OpenPGP{}
-		default:
-			return nil, fmt.Errorf("Decoder of type '%s' is not supported", tmp.Type)
-		}
 		return res, UnmarshalAndStart(res, js)
 	}
 }
 
-func WriterFromJson(js json.RawMessage) (rw.Writer, error) {
+// WriterFromJSON builds a writer from json.
+func WriterFromJSON(js json.RawMessage) (rw.Writer, error) {
 	tmp := struct {
 		Type string `json:"output"`
 	}{}
 	if err := json.Unmarshal(js, &tmp); err != nil {
 		return nil, err
+	} else if res := RWDFromString(tmp.Type); res == nil {
+		return nil, fmt.Errorf("output of type '%s' is not supported", tmp.Type)
 	} else {
-		var res rw.Writer
-		switch tmp.Type {
-		case "file":
-			res = &file.File{}
-		case "gcs":
-			res = &gcs.GCS{}
-		case "s3":
-			res = &s3.S3{}
-		default:
-			return nil, fmt.Errorf("Output of type '%s' is not supported", tmp.Type)
-		}
 		return res, UnmarshalAndStart(res, js)
 	}
 }
 
-func ReaderFromJson(js json.RawMessage) (rw.Reader, error) {
+// ReaderFromJSON builds a reader from json.
+func ReaderFromJSON(js json.RawMessage) (rw.Reader, error) {
 	tmp := struct {
 		Type string `json:"input"`
 	}{}
 	if err := json.Unmarshal(js, &tmp); err != nil {
 		return nil, err
+	} else if res := RWDFromString(tmp.Type); res == nil {
+		return nil, fmt.Errorf("input of type '%s' is not supported", tmp.Type)
 	} else {
-		var res rw.Reader
-		switch tmp.Type {
-		case "file":
-			res = &file.File{}
-		case "gcs":
-			res = &gcs.GCS{}
-		case "s3":
-			res = &s3.S3{}
-		default:
-			return nil, fmt.Errorf("Input of type '%s' is not supported", tmp.Type)
-		}
 		return res, UnmarshalAndStart(res, js)
 	}
 }
 
-func DeleterFromJson(js json.RawMessage) (rw.Deleter, error) {
+// DeleterFromJSON builds a deleter from json.
+func DeleterFromJSON(js json.RawMessage) (rw.Deleter, error) {
 	tmp := struct {
 		Type string `json:"type"`
 	}{}
+	var res rw.Deleter
 	if err := json.Unmarshal(js, &tmp); err != nil {
 		return nil, err
-	} else {
-		var res rw.Deleter
-		switch tmp.Type {
-		case "file":
-			res = &file.File{}
-		case "gcs":
-			res = &gcs.GCS{}
-		case "s3":
-			res = &s3.S3{}
-		case "":
-			return nil, errors.New("A deleter should define it's type.")
-		default:
-			return nil, fmt.Errorf("Deleter of type '%s' is not supported", tmp.Type)
-		}
-		return res, UnmarshalAndStart(res, js)
+	} else if tmp.Type == "" {
+		return nil, errors.New("a deleter should define it's type")
+	} else if res = RWDFromString(tmp.Type); res == nil {
+		return nil, fmt.Errorf("deleter of type '%s' is not supported", tmp.Type)
 	}
+	return res, UnmarshalAndStart(res, js)
+}
+
+// RWDFromString returns a rw.ReadWriteDeleter from it's name.
+func RWDFromString(str string) rw.ReadWriteDeleter {
+	var res rw.ReadWriteDeleter
+	switch str {
+	case "file":
+		res = &file.File{}
+	case "gcs":
+		res = &gcs.GCS{}
+	case "s3":
+		res = &s3.S3{}
+	}
+	return res
+}
+
+// EncoderDecoderFromString returns an encoders.EncoderDecoder from it's name.
+func EncoderDecoderFromString(str string) encoders.EncoderDecoder {
+	var res encoders.EncoderDecoder
+	switch str {
+	case "gzip":
+		res = &gzip.Gzip{}
+	case "aes":
+		res = &aes.AES{}
+	case "openpgp":
+		res = &openpgp.OpenPGP{}
+	}
+	return res
 }

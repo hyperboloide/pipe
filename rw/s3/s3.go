@@ -11,11 +11,6 @@ import (
 // S3DefaultDomain is the default domain to connect to S3
 const S3DefaultDomain = "s3.amazonaws.com"
 
-var (
-	// ErrS3BucketUndefined is returned when the bucket is undefined
-	ErrS3BucketUndefined = errors.New("S3 bucket is undefined.")
-)
-
 // S3 defines connection parameters to S3.
 // An S3 Object allow the use of AWS S3.
 type S3 struct {
@@ -41,7 +36,7 @@ func (s *S3) Start() error {
 	}
 
 	if s.Bucket == "" {
-		return ErrS3BucketUndefined
+		return errors.New("s3 bucket is undefined")
 	}
 
 	var s3p *s3gof3r.S3

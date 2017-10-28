@@ -55,10 +55,7 @@ func Test1(t *testing.T) {
 	defer srv.Close()
 
 	const id = "file_id_1234"
-	data := struct {
-		In  int64 `bytes_in`
-		Out int64 `bytes_out`
-	}{}
+	data := &WriteResponse{}
 
 	// post the file
 	if resp, err := http.Post(srv.URL+"/test/"+id, "image/jpeg", fileReader(testImageFile)); err != nil {
@@ -71,7 +68,7 @@ func Test1(t *testing.T) {
 		t.Error(errors.New("uploaded file do not match the original"))
 	} else if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		t.Error(err)
-	} else if int64(len(fileBytes(testImageFile))) != data.In {
+	} else if int64(len(fileBytes(testImageFile))) != data.BytesIn {
 		t.Error(errors.New("result size of file do not match the original"))
 	}
 
