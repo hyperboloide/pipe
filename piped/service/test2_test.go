@@ -41,7 +41,7 @@ func Test2(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if res, err := ioutil.ReadFile(destDir + "/" + id); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(res, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(res, fileBytes(testImageFile)) {
 		t.Error(errors.New("uploaded file do not match the original"))
 	}
 
@@ -52,7 +52,7 @@ func Test2(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(body, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(body, fileBytes(testImageFile)) {
 		t.Error(errors.New("downloaded file do not match the original"))
 	}
 
@@ -63,7 +63,7 @@ func Test2(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(body, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(body, fileBytes(testImageFile)) {
 		t.Error(errors.New("downloaded file do not match the original"))
 	}
 
@@ -74,7 +74,7 @@ func Test2(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(body, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(body, fileBytes(testImageFile)) {
 		t.Error(errors.New("downloaded file do not match the original"))
 	}
 

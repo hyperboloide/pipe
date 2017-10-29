@@ -64,7 +64,7 @@ func Test1(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if res, err := ioutil.ReadFile(destDir + "/" + id); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(res, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(res, fileBytes(testImageFile)) {
 		t.Error(errors.New("uploaded file do not match the original"))
 	} else if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		t.Error(err)
@@ -79,7 +79,7 @@ func Test1(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if body, err := ioutil.ReadAll(resp.Body); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(body, fileBytes(testImageFile)) == false {
+	} else if !bytes.Equal(body, fileBytes(testImageFile)) {
 		t.Error(errors.New("downloaded file do not match the original"))
 	}
 
@@ -90,7 +90,7 @@ func Test1(t *testing.T) {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	} else if res, err := ioutil.ReadFile(destDir + "/" + id); err != nil {
 		t.Error(err)
-	} else if bytes.Equal(res, fileBytes(testTextFile)) == false {
+	} else if !bytes.Equal(res, fileBytes(testTextFile)) {
 		t.Error(errors.New("updated file do not match the original"))
 	}
 
@@ -119,7 +119,7 @@ func Test1(t *testing.T) {
 		t.Error(err)
 	} else if resp, err := client.Do(req); err != nil {
 		t.Error(err)
-	} else if resp.StatusCode != 500 {
+	} else if resp.StatusCode != 204 {
 		t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 	}
 
@@ -136,7 +136,7 @@ func Test1(t *testing.T) {
 		t.Error(err)
 	} else if len(files) != 1 {
 		t.Error(errors.New("directory should have 1 file"))
-	} else if bytes.Equal(fileBytes(testImageFile), fileBytes(destDir+"/"+files[0].Name())) == false {
+	} else if !bytes.Equal(fileBytes(testImageFile), fileBytes(destDir+"/"+files[0].Name())) {
 		t.Error(errors.New("updated file do not match the original"))
 	}
 }
@@ -181,7 +181,7 @@ func Test1Form(t *testing.T) {
 			t.Error(fmt.Errorf("invalid response status code %d", resp.StatusCode))
 		} else if res, err := ioutil.ReadFile(destDir + "/" + id); err != nil {
 			t.Error(err)
-		} else if bytes.Equal(res, fileBytes(testImageFile)) == false {
+		} else if !bytes.Equal(res, fileBytes(testImageFile)) {
 			t.Error(errors.New("uploaded file do not match the original"))
 		}
 	}
